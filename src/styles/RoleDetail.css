@@ -1,0 +1,239 @@
+/* src/styles/RoleDetail.css */
+.role-detail {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.role-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.role-detail-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close-button {
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.close-button:hover {
+  background-color: var(--gray-200);
+}
+
+.role-detail-content {
+  padding: 1.5rem 2rem;
+  flex: 1;
+  overflow: auto;
+}
+
+.role-properties {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.permissions-section {
+  margin-bottom: 2rem;
+}
+
+.permissions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.permissions-header h3 {
+  font-size: 1.125rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.select-all label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.select-all input {
+  margin-right: 0.5rem;
+  width: auto;
+}
+
+.permissions-tree {
+  max-height: 600px;
+  overflow-y: auto;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+}
+
+.module-item {
+  margin-bottom: 1.5rem;
+}
+
+.module-item:last-child {
+  margin-bottom: 0;
+}
+
+.module-header {
+  padding: 0.75rem 1rem;
+  background-color: var(--gray-100);
+  border-radius: var(--border-radius);
+  margin-bottom: 0.75rem;
+}
+
+.module-header label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+}
+
+.module-header input {
+  margin-right: 0.75rem;
+  width: auto;
+}
+
+.module-pages {
+  padding-left: 2rem;
+}
+
+.page-item {
+  margin-bottom: 0.75rem;
+}
+
+.page-header {
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  background-color: var(--gray-50);
+}
+
+.page-header:hover {
+  background-color: var(--gray-100);
+}
+
+.page-header label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+}
+
+.page-header input {
+  margin-right: 0.75rem;
+  width: auto;
+}
+
+.page-operations {
+  padding-left: 2rem;
+  margin-top: 0.5rem;
+}
+
+.operation-item {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+}
+
+.operation-item:hover {
+  background-color: var(--gray-50);
+}
+
+.operation-item label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.875rem;
+  width: 100%;
+}
+
+.operation-item input {
+  margin-right: 0.75rem;
+  width: auto;
+}
+
+.sql-preview {
+  margin-top: 2rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+}
+
+.sql-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--gray-100);
+  border-bottom: 1px solid var(--gray-300);
+}
+
+.sql-preview-header h3 {
+  font-size: 1.125rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.sql-content {
+  padding: 1.25rem;
+  background-color: var(--gray-800);
+  color: white;
+  font-family: monospace;
+  font-size: 0.875rem;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+  max-height: 500px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
+.role-detail-footer {
+  padding: 1.25rem 2rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+@media (max-width: 768px) {
+  .role-detail-header,
+  .sql-preview-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .sql-preview-header h3 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .permissions-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
