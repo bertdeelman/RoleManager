@@ -10,13 +10,14 @@ interface CloneRoleProps {
 }
 
 const CloneRole: React.FC<CloneRoleProps> = ({ onClose, onCloned }) => {
-  const { roles } = useAppContext();
+  const { roles, cloneRole } = useAppContext();
   
   const [selectedRoleId, setSelectedRoleId] = useState<number | ''>('');
   const [newRoleName, setNewRoleName] = useState('');
   const [customizePermissions, setCustomizePermissions] = useState(false);
   const [generatedSql, setGeneratedSql] = useState('');
   const [validationError, setValidationError] = useState('');
+  const [isCloning, setIsCloning] = useState(false);
   
   // Filter for template roles first (for dropdown)
   const templateRoles = roles.filter(role => role.isTemplate);
@@ -86,14 +87,29 @@ const CloneRole: React.FC<CloneRoleProps> = ({ onClose, onCloned }) => {
   };
   
   // Handle clone button click
-  const handleClone = () => {
+  const handleClone = async () => {
     if (selectedRoleId === '' || !newRoleName.trim()) {
       setValidationError('Please select a role and provide a name for the new role');
       return;
     }
     
-    // For demo purposes, just call onCloned
-    onCloned();
+    try {
+      setIsCloning(true);
+      await cloneRole(Number(selectedRoleId), newRoleName);
+      
+      if (customizePermissions) {
+        // Pass to the edit view
+        onCloned();
+      } else {
+        // Just close and return to the list
+        onClose();
+      }
+    } catch (error) {
+      console.error('Error cloning role:', error);
+      setValidationError(`Failed to clone role: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsCloning(false);
+    }
   };
   
   return (
@@ -117,6 +133,7 @@ const CloneRole: React.FC<CloneRoleProps> = ({ onClose, onCloned }) => {
             value={selectedRoleId}
             onChange={(e) => handleRoleSelect(e.target.value)}
             className="select-role"
+            disabled={isCloning}
           >
             <option value="">-- Select a role --</option>
             
@@ -146,6 +163,7 @@ const CloneRole: React.FC<CloneRoleProps> = ({ onClose, onCloned }) => {
             value={newRoleName}
             onChange={(e) => setNewRoleName(e.target.value)}
             className="input-role-name"
+            disabled={isCloning}
           />
         </div>
         
@@ -155,6 +173,7 @@ const CloneRole: React.FC<CloneRoleProps> = ({ onClose, onCloned }) => {
               type="checkbox"
               checked={customizePermissions}
               onChange={(e) => setCustomizePermissions(e.target.checked)}
+              disabled={isCloning}
             />
             Customize permissions before saving
           </label>
@@ -167,7 +186,7 @@ const CloneRole: React.FC<CloneRoleProps> = ({ onClose, onCloned }) => {
               <button 
                 className="btn btn-copy" 
                 onClick={copySqlToClipboard}
-                disabled={!generatedSql}
+                disabled={!generatedSql || isCloning}
               >
                 Copy to Clipboard
               </button>
@@ -180,13 +199,16 @@ const CloneRole: React.FC<CloneRoleProps> = ({ onClose, onCloned }) => {
       </div>
       
       <div className="clone-role-footer">
-        <button className="btn btn-cancel" onClick={onClose}>Cancel</button>
+        <button className="btn btn-cancel" onClick={onClose} disabled={isCloning}>Cancel</button>
         <button 
           className="btn btn-clone" 
           onClick={handleClone}
-          disabled={!selectedRoleId || !newRoleName.trim()}
+          disabled={!selectedRoleId || !newRoleName.trim() || isCloning}
         >
-          {customizePermissions ? 'Continue to Edit Permissions' : 'Clone Role'}
+          {isCloning 
+            ? 'Cloning...' 
+            : (customizePermissions ? 'Continue to Edit Permissions' : 'Clone Role')
+          }
         </button>
       </div>
     </div>

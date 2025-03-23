@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "migrate": "node scripts/setup-db.cjs"
+    "migrate": "node scripts/setup-db.js"
   },
   "dependencies": {
     "react": "^19.0.0",

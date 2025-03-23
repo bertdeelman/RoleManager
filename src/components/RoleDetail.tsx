@@ -25,7 +25,11 @@ const RoleDetail: React.FC<RoleDetailProps> = ({
   const { 
     hierarchy,
     getRoleById,
-    getPermissionsForRole
+    getPermissionsForRole,
+    createRole,
+    updateRole,
+    cloneRole,
+    updateRolePermissions
   } = useAppContext();
   
   // State for role properties
@@ -40,6 +44,8 @@ const RoleDetail: React.FC<RoleDetailProps> = ({
   
   // SQL preview
   const [generatedSql, setGeneratedSql] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   
   // Permission map for tracking existing permissions
   const [permissionMap, setPermissionMap] = useState<Record<string, RolePermission>>({});
@@ -362,7 +368,7 @@ const RoleDetail: React.FC<RoleDetailProps> = ({
   
   // Calculate if "Select All" should be checked
   const isAllSelected = () => {
-    return hierarchy.every(module => selectedModules[module.id]);
+    return hierarchy.length > 0 && hierarchy.every(module => selectedModules[module.id]);
   };
   
   // Copy SQL to clipboard
@@ -392,12 +398,62 @@ const RoleDetail: React.FC<RoleDetailProps> = ({
   };
   
   // Handle the save action
-  const handleSave = () => {
-    if (isEditing && !isNewRole && !isCloning) {
-      // Update the original role name when saving
-      setOriginalRoleName(roleName);
+  const handleSave = async () => {
+    if (!roleName.trim()) {
+      setSaveError('Role name is required');
+      return;
     }
-    onSave();
+    
+    setIsSaving(true);
+    setSaveError(null);
+    
+    try {
+      if (isNewRole) {
+        if (isCloning && sourceRoleId) {
+          // Clone role
+          await cloneRole(sourceRoleId, roleName);
+        } else {
+          // Create new role
+          const newRoleId = await createRole({
+            name: roleName,
+            status: 0,
+            isTemplate: false
+          });
+          
+          // Update permissions for the new role
+          await updateRolePermissions(
+            newRoleId,
+            selectedModules,
+            selectedPages,
+            selectedOperations
+          );
+        }
+      } else if (roleId) {
+        // Update existing role
+        const role = getRoleById(roleId);
+        if (role && role.name !== roleName && isEditing) {
+          await updateRole({
+            ...role,
+            name: roleName
+          });
+        }
+        
+        // Update permissions
+        await updateRolePermissions(
+          roleId,
+          selectedModules,
+          selectedPages,
+          selectedOperations
+        );
+      }
+      
+      onSave();
+    } catch (error) {
+      console.error('Error saving role:', error);
+      setSaveError(`Failed to save role: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsSaving(false);
+    }
   };
   
   return (
@@ -408,6 +464,12 @@ const RoleDetail: React.FC<RoleDetailProps> = ({
       </div>
       
       <div className="role-detail-content">
+        {saveError && (
+          <div className="error-message">
+            {saveError}
+          </div>
+        )}
+        
         <div className="role-properties">
           <div className="form-group">
             <label htmlFor="roleName">Role Name:</label>
@@ -510,13 +572,13 @@ const RoleDetail: React.FC<RoleDetailProps> = ({
       </div>
       
       <div className="role-detail-footer">
-        <button className="btn btn-cancel" onClick={onClose}>Cancel</button>
+        <button className="btn btn-cancel" onClick={onClose} disabled={isSaving}>Cancel</button>
         <button 
           className="btn btn-save" 
           onClick={handleSave} 
-          disabled={!roleName.trim()}
+          disabled={!roleName.trim() || isSaving}
         >
-          {isNewRole ? 'Create Role' : 'Save Changes'}
+          {isSaving ? 'Saving...' : (isNewRole ? 'Create Role' : 'Save Changes')}
         </button>
       </div>
     </div>

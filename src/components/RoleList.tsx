@@ -18,7 +18,7 @@ const RoleList: React.FC<RoleListProps> = ({
   onEditRole,
   onViewTemplateSql
 }) => {
-  const { roles, getPermissionCountForRole, getUserCountForRole, loading, error } = useAppContext();
+  const { roles, getPermissionCountForRole, loading, error } = useAppContext();
   const [filter, setFilter] = useState<string>('');
 
   if (loading) {
@@ -68,7 +68,6 @@ const RoleList: React.FC<RoleListProps> = ({
             <tr>
               <th>Role Name</th>
               <th>Permissions</th>
-              <th>Users</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -80,7 +79,6 @@ const RoleList: React.FC<RoleListProps> = ({
                   {role.isTemplate && <span className="template-badge">Template</span>}
                 </td>
                 <td>{getPermissionCountForRole(role.id)}</td>
-                <td>{getUserCountForRole(role.id)}</td>
                 <td className="action-buttons">
                   <button className="btn btn-view" title="View Role" onClick={() => onViewRole(role.id)}>View</button>
                   <button className="btn btn-clone" title="Clone Role" onClick={() => onCloneRole(role.id)}>Clone</button>

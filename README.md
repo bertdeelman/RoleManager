@@ -1,54 +1,89 @@
-# React + TypeScript + Vite
+# Role Manager with Database Support
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A comprehensive application for managing roles and their permissions with a SQLite database backend.
 
-Currently, two official plugins are available:
+## Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This application provides a user interface for:
+- Viewing existing roles and their permissions
+- Creating new roles
+- Cloning roles from existing ones
+- Managing permissions for modules, pages, and operations
+- Generating SQL scripts for database operations
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Database Backend**: All data is stored in a SQLite database
+- **Role Management**: Intuitive interface for managing roles and permissions
+- **SQL Generation**: Ability to view and copy SQL statements for database operations
+- **Template Roles**: Special handling for template roles
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Technical Details
+
+- Built with React, TypeScript, and Vite
+- Uses SQLite for data storage
+- Follows clean architecture principles with separation of concerns
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+
+### Installation
+
+1. Clone the repository
+```
+git clone https://github.com/yourusername/role-manager.git
+cd role-manager
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+2. Install dependencies
 ```
+npm install
+```
+
+3. Run the development server
+```
+npm run dev
+```
+
+4. Initialize the database (first time only)
+```
+npm run migrate
+```
+
+## Architecture
+
+### Directory Structure
+
+```
+src/
+  ├── components/     # UI components
+  ├── context/        # React context
+  ├── data/           # Static data (for migration)
+  ├── services/       # Database services
+  ├── styles/         # CSS styles
+  ├── types/          # TypeScript models and interfaces
+  ├── utils/          # Utility functions
+  └── App.tsx         # Main application component
+scripts/
+  └── migrateData.ts  # Database migration script
+```
+
+### Key Files
+
+- **services/db.ts**: Database operations and initialization
+- **services/dataMigration.ts**: Migration of static data to the database
+- **context/AppContext.tsx**: State management and data operations
+- **components/RoleDetail.tsx**: Role editing component
+- **components/RoleList.tsx**: Role listing component
+
+## Configuration
+
+The application creates a SQLite database file at `./rolemanager.db`. You can modify the database path in `src/services/db.ts`.
+
+## License
+
+MIT
