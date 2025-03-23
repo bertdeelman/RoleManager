@@ -9,6 +9,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  max-width: 1400px; /* Consistent width with other components */
 }
 
 .role-detail-header {
@@ -53,6 +54,26 @@
   margin-bottom: 1.5rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--gray-200);
+}
+
+.role-name-edit-container {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.role-name-edit-container input {
+  flex: 1;
+}
+
+.role-name-edit-btn {
+  flex-shrink: 0;
+  width: 100px;
+}
+
+.disabled-input {
+  background-color: var(--gray-100);
+  cursor: not-allowed;
 }
 
 .permissions-section {
@@ -235,5 +256,14 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
+  }
+  
+  .role-name-edit-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .role-name-edit-btn {
+    width: 100%;
   }
 }

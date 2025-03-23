@@ -1,6 +1,6 @@
 // src/components/RoleDetail.tsx
 import React, { useState, useEffect } from 'react';
-import { Role, ModuleWithPages, RolePermission } from '../types/models';
+import { RolePermission } from '../types/models';
 import { useAppContext } from '../context/AppContext';
 import { SqlGenerator } from '../utils/sqlGenerator';
 import '../styles/RoleDetail.css';
@@ -23,9 +23,6 @@ const RoleDetail: React.FC<RoleDetailProps> = ({
   onSave,
 }) => {
   const { 
-    modules, 
-    roles, 
-    rolePermissions, 
     hierarchy,
     getRoleById,
     getPermissionsForRole
@@ -33,6 +30,8 @@ const RoleDetail: React.FC<RoleDetailProps> = ({
   
   // State for role properties
   const [roleName, setRoleName] = useState('');
+  const [originalRoleName, setOriginalRoleName] = useState('');
+  const [isEditing, setIsEditing] = useState(isNewRole || isCloning);
   
   // Permission selection state
   const [selectedModules, setSelectedModules] = useState<Record<number, boolean>>({});
@@ -48,13 +47,21 @@ const RoleDetail: React.FC<RoleDetailProps> = ({
   // Load role data
   useEffect(() => {
     if (isNewRole || !roleId) {
-      setRoleName(isCloning && sourceRoleId ? `Copy of ${getRoleById(sourceRoleId)?.name || ''}` : 'New Role');
+      const defaultName = isCloning && sourceRoleId 
+        ? `Copy of ${getRoleById(sourceRoleId)?.name || ''}` 
+        : 'New Role';
+      
+      setRoleName(defaultName);
+      setOriginalRoleName(defaultName);
+      setIsEditing(true);
       return;
     }
     
     const role = getRoleById(roleId);
     if (role) {
       setRoleName(role.name);
+      setOriginalRoleName(role.name);
+      setIsEditing(isNewRole || isCloning);
     }
     
     // Load permissions
@@ -152,6 +159,13 @@ const RoleDetail: React.FC<RoleDetailProps> = ({
           }
         });
       
+      // Add SQL for role rename if needed
+      let sql = '';
+      const role = getRoleById(roleId);
+      if (role && role.name !== roleName && isEditing) {
+        sql += `-- Rename role\nUPDATE ROLES SET RoleName = '${roleName}' WHERE RoleId = ${roleId};\n\n`;
+      }
+      
       // Find operations to add
       Object.entries(selectedOperations)
         .filter(([, selected]) => selected)
@@ -183,14 +197,18 @@ const RoleDetail: React.FC<RoleDetailProps> = ({
         }
       });
       
-      if (toAdd.moduleIds.length > 0 || toAdd.pageIds.length > 0 || toAdd.operationIds.length > 0 || toRemove.length > 0) {
-        const sql = SqlGenerator.generatePermissionsChangeScript(roleId, toAdd, toRemove);
+      if (toAdd.moduleIds.length > 0 || toAdd.pageIds.length > 0 || toAdd.operationIds.length > 0 || toRemove.length > 0 || sql !== '') {
+        if (sql === '') {
+          sql = SqlGenerator.generatePermissionsChangeScript(roleId, toAdd, toRemove);
+        } else {
+          sql += SqlGenerator.generatePermissionsChangeScript(roleId, toAdd, toRemove);
+        }
         setGeneratedSql(sql);
       } else {
         setGeneratedSql('-- No changes to save');
       }
     }
-  }, [isNewRole, isCloning, roleId, sourceRoleId, roleName, selectedModules, selectedPages, selectedOperations, permissionMap]);
+  }, [isNewRole, isCloning, roleId, sourceRoleId, roleName, selectedModules, selectedPages, selectedOperations, permissionMap, getRoleById, isEditing]);
   
   // Handle checkbox changes
   const handleModuleChange = (moduleId: number, checked: boolean) => {
@@ -358,6 +376,29 @@ const RoleDetail: React.FC<RoleDetailProps> = ({
         alert('Failed to copy SQL to clipboard');
       });
   };
+
+  // Toggle editing mode for role name
+  const toggleEditing = () => {
+    if (!isNewRole && !isCloning) {
+      if (isEditing) {
+        // Cancel editing - revert to original name
+        setRoleName(originalRoleName);
+        setIsEditing(false);
+      } else {
+        // Start editing
+        setIsEditing(true);
+      }
+    }
+  };
+  
+  // Handle the save action
+  const handleSave = () => {
+    if (isEditing && !isNewRole && !isCloning) {
+      // Update the original role name when saving
+      setOriginalRoleName(roleName);
+    }
+    onSave();
+  };
   
   return (
     <div className="role-detail">
@@ -370,13 +411,25 @@ const RoleDetail: React.FC<RoleDetailProps> = ({
         <div className="role-properties">
           <div className="form-group">
             <label htmlFor="roleName">Role Name:</label>
-            <input
-              type="text"
-              id="roleName"
-              value={roleName}
-              onChange={(e) => setRoleName(e.target.value)}
-              disabled={!isNewRole && !isCloning}
-            />
+            <div className="role-name-edit-container">
+              <input
+                type="text"
+                id="roleName"
+                value={roleName}
+                onChange={(e) => setRoleName(e.target.value)}
+                disabled={!isEditing}
+                className={isEditing ? "" : "disabled-input"}
+              />
+              {!isNewRole && !isCloning && (
+                <button 
+                  className="btn btn-edit role-name-edit-btn" 
+                  onClick={toggleEditing}
+                  title={isEditing ? "Cancel editing" : "Edit role name"}
+                >
+                  {isEditing ? "Cancel" : "Rename"}
+                </button>
+              )}
+            </div>
           </div>
         </div>
         
@@ -458,7 +511,11 @@ const RoleDetail: React.FC<RoleDetailProps> = ({
       
       <div className="role-detail-footer">
         <button className="btn btn-cancel" onClick={onClose}>Cancel</button>
-        <button className="btn btn-save" onClick={onSave} disabled={!roleName.trim()}>
+        <button 
+          className="btn btn-save" 
+          onClick={handleSave} 
+          disabled={!roleName.trim()}
+        >
           {isNewRole ? 'Create Role' : 'Save Changes'}
         </button>
       </div>

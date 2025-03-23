@@ -1,6 +1,5 @@
 // src/utils/templateSqlGenerator.ts
 import { Role, RolePermission } from '../types/models';
-import { SqlGenerator } from './sqlGenerator';
 
 /**
  * Generates SQL script for creating template roles from scratch
@@ -11,7 +10,7 @@ export const generateTemplateRoleSql = (
 ): string => {
   // Step 1: Create role
   let sql = `-- SQL to create template role: ${role.name}\n`;
-  sql += `INSERT INTO Roles (RoleName, Status)\nVALUES ('${role.name}', ${role.status});\n\n`;
+  sql += `INSERT INTO ROLES (RoleName, Status)\nVALUES ('${role.name}', ${role.status});\n\n`;
   sql += `DECLARE @RoleId INT = SCOPE_IDENTITY();\n\n`;
 
   // Step 2: Group permissions by type (module, page, operation)
@@ -23,7 +22,7 @@ export const generateTemplateRoleSql = (
   if (modulePermissions.length > 0) {
     sql += `-- Add module permissions\n`;
     modulePermissions.forEach(p => {
-      sql += `INSERT INTO RolePermissions (RoleId, PageId, ModuleId, OperationId)\n`;
+      sql += `INSERT INTO ROLEPERMISSIONS (RoleId, PageId, ModuleId, OperationId)\n`;
       sql += `VALUES (@RoleId, NULL, ${p.moduleId}, NULL);\n`;
     });
     sql += '\n';
@@ -33,7 +32,7 @@ export const generateTemplateRoleSql = (
   if (pagePermissions.length > 0) {
     sql += `-- Add page permissions\n`;
     pagePermissions.forEach(p => {
-      sql += `INSERT INTO RolePermissions (RoleId, PageId, ModuleId, OperationId)\n`;
+      sql += `INSERT INTO ROLEPERMISSIONS (RoleId, PageId, ModuleId, OperationId)\n`;
       sql += `VALUES (@RoleId, ${p.pageId}, NULL, NULL);\n`;
     });
     sql += '\n';
@@ -43,7 +42,7 @@ export const generateTemplateRoleSql = (
   if (operationPermissions.length > 0) {
     sql += `-- Add operation permissions\n`;
     operationPermissions.forEach(p => {
-      sql += `INSERT INTO RolePermissions (RoleId, PageId, ModuleId, OperationId)\n`;
+      sql += `INSERT INTO ROLEPERMISSIONS (RoleId, PageId, ModuleId, OperationId)\n`;
       sql += `VALUES (@RoleId, NULL, NULL, ${p.operationId});\n`;
     });
   }

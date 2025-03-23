@@ -1,5 +1,5 @@
 // src/components/CloneRole.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { SqlGenerator } from '../utils/sqlGenerator';
 import '../styles/CloneRole.css';
@@ -16,28 +16,51 @@ const CloneRole: React.FC<CloneRoleProps> = ({ onClose, onCloned }) => {
   const [newRoleName, setNewRoleName] = useState('');
   const [customizePermissions, setCustomizePermissions] = useState(false);
   const [generatedSql, setGeneratedSql] = useState('');
+  const [validationError, setValidationError] = useState('');
   
   // Filter for template roles first (for dropdown)
   const templateRoles = roles.filter(role => role.isTemplate);
   const otherRoles = roles.filter(role => !role.isTemplate);
   
-  // Generate SQL when selections change
-  const handleGenerateSql = () => {
-    if (selectedRoleId === '' || !newRoleName.trim()) {
-      return;
+  // Initialize with first template role if available
+  useEffect(() => {
+    if (roles.length > 0 && selectedRoleId === '') {
+      const firstTemplateRole = templateRoles[0];
+      if (firstTemplateRole) {
+        setSelectedRoleId(firstTemplateRole.id);
+        setNewRoleName(`Copy of ${firstTemplateRole.name}`);
+      } else if (otherRoles.length > 0) {
+        const firstRole = otherRoles[0];
+        setSelectedRoleId(firstRole.id);
+        setNewRoleName(`Copy of ${firstRole.name}`);
+      }
     }
-    
-    const sql = SqlGenerator.generateCloneRoleScript(
-      Number(selectedRoleId),
-      newRoleName
-    );
-    
-    setGeneratedSql(sql);
-  };
+  }, [roles, templateRoles, otherRoles, selectedRoleId]);
+  
+  // Generate SQL when selections change
+  useEffect(() => {
+    if (selectedRoleId !== '' && newRoleName.trim()) {
+      const sql = SqlGenerator.generateCloneRoleScript(
+        Number(selectedRoleId),
+        newRoleName
+      );
+      setGeneratedSql(sql);
+      setValidationError('');
+    } else {
+      setGeneratedSql('');
+      if (selectedRoleId === '') {
+        setValidationError('Please select a role to clone');
+      } else if (!newRoleName.trim()) {
+        setValidationError('Please enter a name for the new role');
+      } else {
+        setValidationError('');
+      }
+    }
+  }, [selectedRoleId, newRoleName]);
   
   // Handle role selection
   const handleRoleSelect = (roleId: string) => {
-    setSelectedRoleId(roleId);
+    setSelectedRoleId(roleId === '' ? '' : Number(roleId));
     
     // Set a default name based on selected role
     if (roleId) {
@@ -64,10 +87,13 @@ const CloneRole: React.FC<CloneRoleProps> = ({ onClose, onCloned }) => {
   
   // Handle clone button click
   const handleClone = () => {
-    handleGenerateSql();
-    if (!customizePermissions) {
-      onCloned();
+    if (selectedRoleId === '' || !newRoleName.trim()) {
+      setValidationError('Please select a role and provide a name for the new role');
+      return;
     }
+    
+    // For demo purposes, just call onCloned
+    onCloned();
   };
   
   return (
@@ -78,6 +104,12 @@ const CloneRole: React.FC<CloneRoleProps> = ({ onClose, onCloned }) => {
       </div>
       
       <div className="clone-role-content">
+        {validationError && (
+          <div className="validation-error">
+            {validationError}
+          </div>
+        )}
+        
         <div className="form-group">
           <label htmlFor="templateRole">Template Role:</label>
           <select
@@ -141,15 +173,8 @@ const CloneRole: React.FC<CloneRoleProps> = ({ onClose, onCloned }) => {
               </button>
             </div>
             <pre className="sql-content">
-              {generatedSql || 'Click "Generate SQL" to preview the SQL statements.'}
+              {generatedSql || 'Select a role and provide a name to preview the SQL statements.'}
             </pre>
-            <button 
-              className="btn btn-generate-sql" 
-              onClick={handleGenerateSql}
-              disabled={!selectedRoleId || !newRoleName.trim()}
-            >
-              Generate SQL
-            </button>
           </div>
         )}
       </div>

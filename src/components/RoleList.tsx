@@ -1,6 +1,5 @@
 // src/components/RoleList.tsx
 import React, { useState } from 'react';
-import { Role } from '../types/models';
 import { useAppContext } from '../context/AppContext';
 import '../styles/RoleList.css';
 
@@ -9,13 +8,15 @@ interface RoleListProps {
   onCreateRole: () => void;
   onCloneRole: (roleId?: number) => void;
   onEditRole: (roleId: number) => void;
+  onViewTemplateSql: () => void;
 }
 
 const RoleList: React.FC<RoleListProps> = ({
   onViewRole,
   onCreateRole,
   onCloneRole,
-  onEditRole
+  onEditRole,
+  onViewTemplateSql
 }) => {
   const { roles, getPermissionCountForRole, getUserCountForRole, loading, error } = useAppContext();
   const [filter, setFilter] = useState<string>('');
@@ -45,10 +46,10 @@ const RoleList: React.FC<RoleListProps> = ({
   return (
     <div className="role-list-container">
       <div className="role-list-header">
-        <h1>Role Manager</h1>
         <div className="role-actions">
           <button className="btn btn-primary" onClick={onCreateRole}>Create New Role</button>
           <button className="btn btn-secondary" onClick={() => onCloneRole()}>Clone Role</button>
+          <button className="btn btn-info" onClick={onViewTemplateSql}>View Template SQL</button>
           <div className="search-container">
             <input
               type="text"

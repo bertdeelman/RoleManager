@@ -80,14 +80,6 @@ function App() {
       <div className="app-container">
         <header className="app-header">
           <h1>Role Manager</h1>
-          {viewMode === 'list' && (
-            <button 
-              className="btn btn-info template-sql-btn" 
-              onClick={handleViewTemplateSql}
-            >
-              View Template SQL
-            </button>
-          )}
         </header>
         
         <main className="app-content">
@@ -97,6 +89,7 @@ function App() {
               onCreateRole={handleCreateRole}
               onCloneRole={handleCloneRole}
               onEditRole={handleEditRole}
+              onViewTemplateSql={handleViewTemplateSql}
             />
           )}
           
